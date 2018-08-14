@@ -1,0 +1,34 @@
+{
+  "name": "primifydb",
+  "version": "1.0.0",
+  "description": "Really primitive Database for very specific UUID oriented / datetime oriented data fetching ",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test",
+    "start": "nodemon --exec babel-node --presets env,stage-2 index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Everscape-Labs/PrimifyDB.git"
+  },
+  "keywords": [
+    "database",
+    "filesystem"
+  ],
+  "author": "Johan Leche",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Everscape-Labs/PrimifyDB/issues"
+  },
+  "homepage": "https://github.com/Everscape-Labs/PrimifyDB#readme",
+  "dependencies": {
+    "fastify": "^1.9.0",
+    "mkdirp": "^0.5.1",
+    "winston": "^2.4.3"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-stage-2": "^6.24.1"
+  }
+}
