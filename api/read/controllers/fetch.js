@@ -8,7 +8,7 @@ const main = (Fastify) => async (request, reply) => {
   if (date) {
     data = await readSingleDate(database, collection, key, date);
   } else if (dateFrom && dateTo) {
-    data = await readRangeOfDates(database, collection, key, dateFrom, dateTo);
+    data = await readRangeOfDates(database, collection, key, new Date(dateFrom), new Date(dateTo));
   }
 
 

@@ -132,21 +132,17 @@ export const createCollectionIfNotExists = async (database, collection) => {
   return getCollectionPath(database, collection);
 };
 
-const formatDate = (dateSubmitted) => {
-  const date = new Date(dateSubmitted);
+const formatDate = (date) => {
+  var d = new Date(date),
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear();
 
-  const formatted = [
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDay(),
-  ].join('');
+  if (month.length < 2) month = '0' + month;
+  if (day.length < 2) day = '0' + day;
 
-  logger.info(`dateSubmitted is ${dateSubmitted}`)
-  logger.info(`DATE is ${date}`)
-  logger.info('formatted is ', formatted)
-
-  return formatted;
-};
+  return [year, month, day].join('');
+}
 
 export const generateKeyStorageDirectoryPath = (database, collection, date) =>
   path.join(getCollectionPath(database, collection), formatDate(date));
@@ -180,25 +176,66 @@ export const generateKeyStorageDirectoryIfNotExists = async (database, collectio
   return path;
 };
 
-export const readSingleDate = async (database, collection, key, date, objectMode = true) => {
-  const dirPath = generateKeyStorageDirectoryPath(database, collection, date);
-
-  const content = await readFile(`${dirPath}/${key}.json`, false);
-
-  if (objectMode === true) {
-    return JSON.parse(`[${content.substring(0, content.length - 2)}]`);
+const escapeOutput = (content) => {
+  if (!content || typeof content !== typeof " ") {
+    return false;
   }
 
-  return content;
+  return content.substring(0, content.length - 2);
 };
 
+export const readSingleDate = async (database, collection, key, date, objectMode = true) => {
+  const dirPath = generateKeyStorageDirectoryPath(database, collection, date);
+  let error     = {};
+  let content   = {};
+
+
+  try {
+    content = await readFile(`${dirPath}/${key}.json`, false);
+  }
+  catch (readError) {
+    error = readError;
+  }
+
+  if (objectMode === true) {
+    const escapedContent = escapeOutput(content);
+
+    if (escapedContent) {
+      return {
+        data : JSON.parse(`[${escapedContent}]`),
+        error,
+      };
+    } else {
+      return {
+        data : null,
+        error: 'content is undefined - cannot escape sentence',
+      };
+    }
+  }
+
+  return {
+    data  : content,
+    error,
+  };
+};
 
 export const readRangeOfDates = async (database, collection, key, dateFrom, dateTo) => {
-  const data = [];
+  const data   = [];
+  const errors = [];
   for (let d = dateFrom; d <= dateTo; d.setDate(d.getDate() + 1)) {
-    data.push(await readSingleDate(database, collection, key, d));
+    const response = await readSingleDate(database, collection, key, d);
+    if (response.data && response.data.length > 0) {
+      data.push(response.data);
+    }
+
+    if (response.error && response.error.length > 0) {
+      errors.push(response.error);
+    }
   }
 
   const content = data.join('');
-  return JSON.parse(`[${content.substring(0, content.length - 2)}]`);
-}
+  return {
+    response: JSON.parse(`[${content.substring(0, content.length - 2)}]`),
+    errors,
+  };
+};

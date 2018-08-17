@@ -1,8 +1,95 @@
 'use strict';
 
-const main = (Fastify) => (request, reply) => {
-  Fastify.log.info(request);
-  return reply.send({ response: true, headers: request.headers, body: request.body, params: request.params });
+import logger from '../../utils/logger';
+import {generateKeyStorageDirectoryIfNotExists} from "../../utils/core";
+import {getFileHandle} from "../../utils/resourcesManager";
+import Timer from '../../utils/Timer';
+
+const smarkBulk = (database, collection, data) => {
+  const time     = new Timer();
+  const cache    = {};
+  let totalWrote = 0;
+
+  data.forEach(async bulkRecord => {
+    const path = `${bulkRecord.date}.${bulkRecord.key}`;
+
+    if (!cache[path]) {
+      cache[path] = {
+        key             : bulkRecord.key,
+        storageDirectory: await generateKeyStorageDirectoryIfNotExists(database, collection, bulkRecord.date),
+        data            : [`${JSON.stringify(bulkRecord.data)},\n`],
+      }
+    } else {
+      cache[path].data.push(`${JSON.stringify(bulkRecord.data)},\n`);
+    }
+  });
+
+  Object.keys(cache).forEach(async path => {
+    const storageFile = `${cache[path].storageDirectory}/${cache[path].key}.json`;
+    const handle      = getFileHandle(storageFile);
+
+    handle.write(cache[path].data);
+    totalWrote += 1;
+  });
+
+  time.end();
+  return Promise.resolve({
+    insertCount: totalWrote,
+    duration   : time.format(),
+  });
+};
+
+
+const regularBulk = async (database, collection, data) => {
+  const time     = new Timer();
+  let totalWrote = 0;
+  data.forEach(async bulkRecord => {
+    const storageDirectory = await generateKeyStorageDirectoryIfNotExists(database, collection, bulkRecord.date);
+    const storageFile      = `${storageDirectory}/${bulkRecord.key}.json`;
+    const handle           = getFileHandle(storageFile);
+
+    handle.write(`${JSON.stringify(bulkRecord.data)},\n`);
+    totalWrote += 1;
+  });
+
+  time.end();
+  return Promise.resolve({
+    insertCount: totalWrote,
+    duration   : time.format(),
+  });
+};
+
+
+/**
+ * Format of the payload for bulk insert :
+ * [{
+ *  key: String,
+ *  date: Date,
+ *  data: Object
+ * }]
+ *
+ * option :
+ *  - smart : will bulk data by key before writing it on disk
+ *
+ * @param Fastify
+ * @returns {Function}
+ */
+const main = (Fastify) => async (request, reply) => {
+  const { data, smart }          = request.body;
+  const { database, collection } = request.params;
+
+  // logger.info('DATA TO INSERT', data);
+  // logger.info('splitField : ', splitField);
+  // logger.info('Date : ', data.date);
+  // logger.info('Date : ', data[splitField]);
+
+  if (smart) {
+    const response = await smarkBulk(database, collection, data);
+    reply.send(response);
+  } else {
+    const response = await regularBulk(database, collection, data);
+    reply.send(response);
+  }
 };
 
 module.exports = main;

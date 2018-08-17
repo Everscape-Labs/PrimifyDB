@@ -4,11 +4,12 @@ import {internal, write, read } from './api';
 import {registerLogger} from './api/utils/logger';
 
 const Fastify = fastify({
-  logger: true
+  logger: true,
+  bodyLimit: 1048576 * 200, // 200 Mo
 });
 
 // register the logger for application wide usage
-registerLogger();
+registerLogger('warning');
 
 // Declare a route
 internal(Fastify);

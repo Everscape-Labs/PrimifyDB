@@ -16,7 +16,7 @@ const main = (Fastify) => {
 
   Fastify.patch(`${basePath}/:collection`, updateRecord(Fastify));
   Fastify.delete(`${basePath}/:collection`, deleteRecord(Fastify));
-  Fastify.post(`${basePath}/bulk/:collection`, deleteRecord(Fastify));
+  Fastify.post(`${basePath}/bulk/:collection`, bulkInsert(Fastify));
 };
 
 

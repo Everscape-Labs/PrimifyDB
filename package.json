@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npm run test",
-    "start": "nodemon --exec babel-node --presets env,stage-2 index.js"
+    "start": "nodemon --ignore 'databases/*' --exec babel-node --presets env,stage-2 index.js"
   },
   "repository": {
     "type": "git",
