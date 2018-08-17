@@ -4,8 +4,10 @@
   "description": "Really primitive Database for very specific UUID oriented / datetime oriented data fetching ",
   "main": "index.js",
   "scripts": {
+    "babel-node": "babel-node --presets=latest",
     "test": "npm run test",
-    "start": "nodemon --ignore 'databases/*' --exec babel-node --presets env,stage-2 index.js"
+    "start": "nodemon --ignore 'databases/*' --exec babel-node --presets env,stage-2 index.js",
+    "prod": "babel-node --presets env,stage-2 ./index.js"
   },
   "repository": {
     "type": "git",
