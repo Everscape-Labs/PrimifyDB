@@ -1,5 +1,4 @@
 import fs from 'fs';
-import logger from './logger';
 
 const keepAliveDuration = 1000; // seconds
 let resourceCount       = 0;
@@ -29,6 +28,7 @@ export const getFileHandle = (path) => {
     keepAlive: false,
     handle   : fs.createWriteStream(path, {flags: 'a'}),
   };
+
   registerExpiration(path);
 
   return cache[path].handle;

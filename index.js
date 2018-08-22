@@ -9,14 +9,14 @@ const Fastify = fastify({
 });
 
 // register the logger for application wide usage
-registerLogger('warning');
+registerLogger('debug');
 
 // Declare a route
 internal(Fastify);
 write(Fastify);
 read(Fastify);
 
-Fastify.listen(3000, (err, address) => {
+Fastify.listen(3001, (err, address) => {
   if (err) {
     throw err;
   }

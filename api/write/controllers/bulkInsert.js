@@ -1,11 +1,10 @@
 'use strict';
 
-import logger from '../../utils/logger';
 import {generateKeyStorageDirectoryIfNotExists} from "../../utils/core";
 import {getFileHandle} from "../../utils/resourcesManager";
 import Timer from '../../utils/Timer';
 
-const smarkBulk = (database, collection, data) => {
+const smartBulk = async (database, collection, data) => {
   const time     = new Timer();
   const cache    = {};
   let totalWrote = 0;
@@ -24,7 +23,7 @@ const smarkBulk = (database, collection, data) => {
     }
   });
 
-  Object.keys(cache).forEach(async path => {
+  await Object.keys(cache).forEach(async path => {
     const storageFile = `${cache[path].storageDirectory}/${cache[path].key}.json`;
     const handle      = getFileHandle(storageFile);
 
@@ -43,7 +42,8 @@ const smarkBulk = (database, collection, data) => {
 const regularBulk = async (database, collection, data) => {
   const time     = new Timer();
   let totalWrote = 0;
-  data.forEach(async bulkRecord => {
+
+  await data.forEach(async bulkRecord => {
     const storageDirectory = await generateKeyStorageDirectoryIfNotExists(database, collection, bulkRecord.date);
     const storageFile      = `${storageDirectory}/${bulkRecord.key}.json`;
     const handle           = getFileHandle(storageFile);
@@ -71,10 +71,9 @@ const regularBulk = async (database, collection, data) => {
  * option :
  *  - smart : will bulk data by key before writing it on disk
  *
- * @param Fastify
  * @returns {Function}
  */
-const main = (Fastify) => async (request, reply) => {
+const main = () => async (request, reply) => {
   const { data, smart }          = request.body;
   const { database, collection } = request.params;
 
@@ -84,7 +83,7 @@ const main = (Fastify) => async (request, reply) => {
   // logger.info('Date : ', data[splitField]);
 
   if (smart) {
-    const response = await smarkBulk(database, collection, data);
+    const response = await smartBulk(database, collection, data);
     reply.send(response);
   } else {
     const response = await regularBulk(database, collection, data);
