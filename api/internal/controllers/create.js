@@ -1,9 +1,9 @@
-import {notImplemented} from '../../utils/constants';
 import {createDatabaseIfNotExists,createCollectionIfNotExists} from "../../utils/core";
 
-const main = (Fastify) => async (request, reply) => {
+const main = () => async (request, reply) => {
   const database    = request.params.database;
   const collection  = request.body.collection;
+
   const databaseCreatedFS   = await createDatabaseIfNotExists(database);
   const collectionCreatedFS = await createCollectionIfNotExists(database, collection);
 

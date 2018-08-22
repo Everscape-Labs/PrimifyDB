@@ -24,10 +24,8 @@ export const getCollectionPath = (database, collection) => {
     collection
   });
 
-  const dirPath = path.join(config.path, database, 'collections', collection);
-
-  return dirPath;
-}
+  return path.join(config.path, database, 'collections', collection);
+};
 
 const registerDatabaseInCache = (database) => {
   logger.debug(`[utils/fileSystem] cache registration : database ${database}`);
@@ -110,11 +108,11 @@ export const createDatabaseIfNotExists = async (database) => {
     await createDatabase(database);
     await createDatabaseMeta(database);
 
-    return getDatabasePath(database, collection);
+    return getDatabasePath(database);
   }
 
   logger.debug(`[utils/fileSystem] no database : ${database}`);
-  return getDatabasePath(database, collection);
+  return getDatabasePath(database);
 };
 
 export const createCollectionIfNotExists = async (database, collection) => {
@@ -133,16 +131,25 @@ export const createCollectionIfNotExists = async (database, collection) => {
 };
 
 const formatDate = (date) => {
-  var d = new Date(date),
-      month = '' + (d.getMonth() + 1),
-      day = '' + d.getDate(),
-      year = d.getFullYear();
+  const d    = new Date(date);
+  let month  = '' + (d.getMonth() + 1),
+        day  = '' + d.getDate(),
+        year = d.getFullYear();
 
-  if (month.length < 2) month = '0' + month;
-  if (day.length < 2) day = '0' + day;
+  if (month.length < 2) {
+    month = '0' + month;
+  }
 
-  return [year, month, day].join('');
-}
+  if (day.length < 2) {
+    day = '0' + day;
+  }
+
+  return [
+    year,
+    month,
+    day
+  ].join('');
+};
 
 export const generateKeyStorageDirectoryPath = (database, collection, date) =>
   path.join(getCollectionPath(database, collection), formatDate(date));
@@ -202,7 +209,7 @@ export const readSingleDate = async (database, collection, key, date, objectMode
 
     if (escapedContent) {
       return {
-        data : JSON.parse(`[${escapedContent}]`),
+        data: JSON.parse(`[${escapedContent}]`),
         error,
       };
     } else {
@@ -214,7 +221,7 @@ export const readSingleDate = async (database, collection, key, date, objectMode
   }
 
   return {
-    data  : content,
+    data: content,
     error,
   };
 };
