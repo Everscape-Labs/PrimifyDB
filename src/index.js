@@ -1,4 +1,5 @@
 'use strict';
+import 'babel-polyfill'
 import fastify from 'fastify';
 import {internal, write, read } from './api';
 import {registerLogger} from './api/utils/logger';
