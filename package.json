@@ -1,6 +1,6 @@
 {
   "name": "primifydb",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Really primitive Database for very specific UUID oriented / datetime oriented data fetching ",
   "main": "index.js",
   "scripts": {
