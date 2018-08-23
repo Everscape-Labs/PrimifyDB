@@ -16,7 +16,8 @@ internal(Fastify);
 write(Fastify);
 read(Fastify);
 
-Fastify.listen(3001, (err, address) => {
+
+Fastify.listen(process.env.PORT || 3000, process.env.HOST || '127.0.0.1', (err, address) => {
   if (err) {
     throw err;
   }
