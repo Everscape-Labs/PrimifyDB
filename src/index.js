@@ -3,6 +3,7 @@ import 'babel-polyfill'
 import fastify from 'fastify';
 import {internal, write, read } from './api';
 import {registerLogger} from './api/utils/logger';
+import launchIngestion from "./workers/ingestion";
 
 const Fastify = fastify({
   logger: true,
@@ -10,7 +11,10 @@ const Fastify = fastify({
 });
 
 // register the logger for application wide usage
-registerLogger('debug');
+registerLogger('warning');
+
+// register the ingestion logic
+launchIngestion();
 
 // Declare a route
 internal(Fastify);

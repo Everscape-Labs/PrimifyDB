@@ -4,20 +4,26 @@ import {join} from "path";
 import {generateKeyStorageDirectoryIfNotExists} from "../../api/utils/core";
 import {getFileHandle} from "../../api/utils/resourcesManager";
 
-const path = join(config.path, 'append_log');
 
-const tail = new Tail(path);
+const launchIngestion = () => {
+  const path = join(config.path, 'append_log');
 
-tail.on("line", async (line) => {
-  const {key, date, database, collection, data } = line;
+  const tail = new Tail(path, { follow: true });
 
-  const storageDirectory = await generateKeyStorageDirectoryIfNotExists(database, collection, date);
-  const storageFile      = `${storageDirectory}/${key}.json`;
-  const handle           = getFileHandle(storageFile);
+  tail.on("line", async (line) => {
+    const record = JSON.parse(line);
+    const { key, date, database, collection, data } = record;
 
-  handle.write(JSON.stringify(`${data},\n`));
-});
+    const storageDirectory = await generateKeyStorageDirectoryIfNotExists(database, collection, date);
+    const storageFile      = `${storageDirectory}/${key}.json`;
+    const handle           = getFileHandle(storageFile);
 
-tail.on("error", function(error) {
-  console.log('ERROR: ', error);
-});
+    handle.write(`${JSON.stringify(data)},\n`);
+  });
+
+  tail.on("error", function (error) {
+    console.log('ERROR: ', error);
+  });
+};
+
+export default launchIngestion;

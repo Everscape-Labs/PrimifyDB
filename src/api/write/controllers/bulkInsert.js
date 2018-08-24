@@ -11,7 +11,7 @@ const regularBulk = async (database, collection, data) => {
   await data.forEach(async bulkRecord => {
     const handle = getAppendLogFileHandle();
 
-    handle.write(`${JSON.stringify(bulkRecord)},\n`);
+    handle.write(`${JSON.stringify(bulkRecord)}\n`);
     totalWrote += 1;
   });
 
@@ -40,7 +40,6 @@ const main = () => async (request, reply) => {
   const { data }                 = request.body;
   const { database, collection } = request.params;
 
-  // logger.info('DATA TO INSERT', data);
   // logger.info('splitField : ', splitField);
   // logger.info('Date : ', data.date);
   // logger.info('Date : ', data[splitField]);
