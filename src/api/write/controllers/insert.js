@@ -1,10 +1,9 @@
 'use strict';
 
 import logger from '../../utils/logger';
-import {generateKeyStorageDirectoryIfNotExists} from "../../utils/core";
-import {getFileHandle} from "../../utils/resourcesManager";
+import {getAppendLogFileHandle} from "../../utils/resourcesManager";
 
-const main = (Fastify) => async (request, reply) => {
+const main = () => async (request, reply) => {
   const { data, key, splitField } = request.body;
   const { database, collection }  = request.params;
 
@@ -21,11 +20,9 @@ const main = (Fastify) => async (request, reply) => {
   // logger.info('Date : ', data.date);
   // logger.info('Date : ', data[splitField]);
 
-  const storageDirectory = await generateKeyStorageDirectoryIfNotExists(database, collection, data[splitField]);
-  const storageFile = `${storageDirectory}/${key}.json`;
-  const handle = getFileHandle(storageFile);
+  const handle = getAppendLogFileHandle();
 
-  handle.write(`${JSON.stringify(data)},\n`);
+  handle.write(`${JSON.stringify({key, date: data[splitField], data})},\n`);
 
   reply.send(temp);
 };

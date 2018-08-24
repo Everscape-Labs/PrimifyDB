@@ -1,10 +1,11 @@
 import fs from 'fs';
+import {join} from 'path';
+import config from '../../config/local';
 
-const keepAliveDuration = 1000; // seconds
-let resourceCount       = 0;
-const cache             = {};
+let resourceCount = 0;
+const cache       = {};
 
-const registerExpiration = (path) => {
+const registerExpiration = (path, keepAliveDuration) => {
   setTimeout(() => {
     if (cache[path].keepAlive === true) {
       cache[path].keepAlive = false;
@@ -17,7 +18,14 @@ const registerExpiration = (path) => {
   }, keepAliveDuration);
 };
 
-export const getFileHandle = (path) => {
+/**
+ *
+ * @param path the path of the file
+ * @param keepAliveDuration / keep alive value, in second(s)
+ * @returns Object
+ */
+
+export const getFileHandle = (path, keepAliveDuration = 1) => {
   if (cache[path]) {
     cache[path].keepAlive = true;
     return cache[path].handle;
@@ -26,10 +34,10 @@ export const getFileHandle = (path) => {
   resourceCount += 1;
   cache[path] = {
     keepAlive: false,
-    handle   : fs.createWriteStream(path, {flags: 'a'}),
+    handle   : fs.createWriteStream(path, { flags: 'a' }),
   };
 
-  registerExpiration(path);
+  registerExpiration(path, keepAliveDuration);
 
   return cache[path].handle;
 };
@@ -37,3 +45,8 @@ export const getFileHandle = (path) => {
 setInterval(() => {
   console.log(`Handles : ${resourceCount}`);
 }, 5000);
+
+export const getAppendLogFileHandle = () => {
+  const path = join(config.path, 'append_log');
+  return getFileHandle(path, 60 * 10) // 10 minutes
+};

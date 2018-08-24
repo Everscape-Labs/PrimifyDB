@@ -9,7 +9,9 @@
     "dev": "nodemon --ignore 'databases/*' --exec babel-node --presets env,stage-2 ./src/index.js",
     "start": "babel-node --presets env,stage-2 ./src/index.js",
     "prod": "node dist/index.js",
-    "build": "babel src -d dist --presets es2015,stage-2"
+    "build": "babel src -d dist --presets es2015,stage-2",
+    "feed": "babel-node --presets env,stage-2 ./src/api/poc/feeder.js",
+    "read": "babel-node --presets env,stage-2 ./src/api/poc/reader.js"
   },
   "repository": {
     "type": "git",
